@@ -162,11 +162,19 @@ url = 'https://www.youtube.com/@ChroNoiR'
 get_channel_thumbnail(url)
 
 folder_path = "output"
-channel_name = url[url.find('@')+1:]
+channel_name_index = url.find('@')
+if channel_name_index > 0:
+    channel_name = url[channel_name_index+1:]
+else:
+    channel_name = url[url.rfind('/')+1:]
 
 output = f'{folder_path}/{channel_name}_qrcode.png'
 output2 = f'{folder_path}/{channel_name}_qrcode_cb.png'
-mask_path = "mask/mask1.png"
+mask_path = input("using mask: ")
+if mask_path:
+    mask_path = f"mask/mask{mask_path}.png"
+else:   
+    mask_path = None
 
 try:
     os.makedirs(folder_path, exist_ok=True)
