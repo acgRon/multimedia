@@ -81,8 +81,8 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
 
     # 生成 QR Code 圖像
     img = qr.make_image(fill_color=color, back_color=bg_color).convert("RGB")
-    if img.mode == "RGB":
-        img = img.convert("RGBA")
+    if img.mode == "RGBA":
+        img = img.convert("RGB")
         #print("QRcode轉成RGBA")
     #做出背景版本的QR Code
     if logo_path:
@@ -90,11 +90,13 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
         # 調整 logo 尺寸（根據 QR Code 的尺寸）
         qr_width, qr_height = img.size
         logo = logo.resize((qr_width, qr_height), Image.LANCZOS)
-        if logo.mode == "RGB":
-            logo = logo.convert("RGBA")
+        if logo.mode == "RGBA":
+            logo = logo.convert("RGB")
             #print("logo轉成RGBA")
         qr_array = np.array(img)
         bg_array = np.array(logo)
+        avg_color = np.mean(bg_array, axis=(0, 1))
+                
         # 創建半透明 QR Code 的效果
         for y in range(qr_array.shape[0]):
             for x in range(qr_array.shape[1]):
@@ -106,7 +108,7 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
                     r = (r + 255)/2
                     g = (g + 255)/2
                     b = (b + 255)/2
-                    qr_array[y, x] = (r, g, b, 255)
+                    qr_array[y, x] = (r, g, b)
                     '''qr_array[y, x] = (bg_array[y, x, 0],  # 使用背景的顏色
                                     bg_array[y, x, 1], 
                                     bg_array[y, x, 2], 
@@ -118,10 +120,11 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
                     r = bg_array[y, x, 0].astype(np.int32)
                     g = bg_array[y, x, 1].astype(np.int32)
                     b = bg_array[y, x, 2].astype(np.int32)
-                    r = r/3
-                    g = g/3
-                    b = b/3
-                    qr_array[y, x] = (r, g, b, 255)
+                    r = r/3 + avg_color[0]/6
+                    g = g/3 + avg_color[0]/6
+                    b = b/3 + avg_color[0]/6
+                    qr_array[y, x] = (r, g, b)
+                    
                     
         bg_qr = Image.fromarray(qr_array)
         #bg_qr.show()
