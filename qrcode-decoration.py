@@ -1,7 +1,9 @@
+import qrcode.image.styledpil
 import requests
 from bs4 import BeautifulSoup
 import qrcode
 from PIL import Image
+import os
 
 thumbnail_path = "channel_thumbnail.jpg"
 
@@ -18,8 +20,8 @@ def get_channel_thumbnail(url):
             file.write(ch_icon)
     return thumbnail_path
 
-
 def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_color="white"):
+    
     # 建立 QR Code 物件
     qr = qrcode.QRCode(
         version=1,  # 控制 QR Code 的大小，值越高，QR Code 越密集
@@ -27,14 +29,15 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
         box_size=10,  # 每個方塊的像素大小
         border=4,  # 邊框的厚度（單位：方塊）
     )
+    
+    logo_path = get_channel_thumbnail(data)
 
     # 添加資料
     qr.add_data(data)
     qr.make(fit=True)
-    
-    logo_path = get_channel_thumbnail(data)
 
     # 生成 QR Code 圖像
+    #img = qr.make_image(image_factory=qrcode.image.styledpil.StyledPilImage, embeded_image_path=logo_path).convert("RGB")
     img = qr.make_image(fill_color=color, back_color=bg_color).convert("RGB")
     if logo_path:
             logo = Image.open(logo_path)
@@ -46,18 +49,30 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
 
             # 計算 logo 的位置並貼到 QR Code 上
             logo_pos = ((qr_width - logo_size) // 2, (qr_height - logo_size) // 2)
-            img.paste(logo, logo_pos)
+            
+            mask = Image.open("mask/mask.png").convert("L")
+            mask = mask.resize((logo_size, logo_size))
+            
+            img.paste(logo, logo_pos, mask)
     # 儲存 QR Code 圖像
+    
     img.save(output_file)
+    
     print(f"QR Code 已儲存到 {output_file}")
 
 url = 'https://www.youtube.com/@mvllabccu9828'
 get_channel_thumbnail(url)
 
+folder_path = "output"
 channel_name = url[url.find('@')+1:]
 
+output = f'{folder_path}/{channel_name}_qrcode.png'
+folder_path
 
-output = f'output/{channel_name}_qrcode.png'
+try:
+    os.makedirs(folder_path, exist_ok=True)
+except FileExistsError:
+    print(f"Folder '{folder_path}' already exists.")
 
 
 
