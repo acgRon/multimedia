@@ -21,7 +21,7 @@ def get_channel_thumbnail(url):
             file.write(ch_icon)
     return thumbnail_path
 
-def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_color="white"):
+def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_color="white", mask_path=None):
     
     # 建立 QR Code 物件
     qr = qrcode.QRCode(
@@ -51,10 +51,13 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
             # 計算 logo 的位置並貼到 QR Code 上
             logo_pos = ((qr_width - logo_size) // 2, (qr_height - logo_size) // 2)
             
-            mask = Image.open("mask/mask.png").convert("L")
-            mask = mask.resize((logo_size, logo_size))
-            
-            img.paste(logo, logo_pos, mask)
+            if mask_path:
+                mask = Image.open(mask_path).convert("L")
+                mask = mask.resize((logo_size, logo_size))
+                img.paste(logo, logo_pos, mask)
+            else:
+                img.paste(logo, logo_pos)
+
     # 儲存 QR Code 圖像
     
     img.save(output_file)
