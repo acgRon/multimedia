@@ -69,7 +69,7 @@ try:
 
     # 儲存最終結果
     img.save("logo.png")
-    print("QR Code 已儲存為 qrcode_with_background_and_logo.png")
+    print("QR Code 已儲存為 logo.png")
 
 except FileNotFoundError:
     print("圖片檔案未找到，無法進行處理。")
