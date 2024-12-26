@@ -113,7 +113,6 @@ folder_path = "output"
 channel_name = url[url.find('@')+1:]
 
 output = f'{folder_path}/{channel_name}_qrcode.png'
-folder_path
 
 try:
     os.makedirs(folder_path, exist_ok=True)
