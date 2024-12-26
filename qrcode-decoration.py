@@ -70,7 +70,7 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
         version=5,  # 控制 QR Code 的大小，值越高，QR Code 越密集
         error_correction=qrcode.constants.ERROR_CORRECT_H,  # 錯誤修正能力（L、M、Q、H）
         box_size=10,  # 每個方塊的像素大小
-        border=4,  # 邊框的厚度（單位：方塊）
+        border=2,  # 邊框的厚度（單位：方塊）
     )
 
     # 添加資料
@@ -98,17 +98,31 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
         # 創建半透明 QR Code 的效果
         for y in range(qr_array.shape[0]):
             for x in range(qr_array.shape[1]):
-                r = bg_array[y, x, 0].astype(np.int32)
-                g = bg_array[y, x, 1].astype(np.int32)
-                b = bg_array[y, x, 2].astype(np.int32)
-                r = (r + 255)/2
-                g = (g + 255)/2
-                b = (b + 255)/2
-                qr_array[y, x] = (r, g, b, 255)
-                '''qr_array[y, x] = (bg_array[y, x, 0],  # 使用背景的顏色
-                                bg_array[y, x, 1], 
-                                bg_array[y, x, 2], 
-                                80)  # 設定透明度（0-255，150為半透明）'''
+                # 如果是白色模塊（檢查 RGB 值是否為白色）
+                if qr_array[y, x, 0] == 255:
+                    r = bg_array[y, x, 0].astype(np.int32)
+                    g = bg_array[y, x, 1].astype(np.int32)
+                    b = bg_array[y, x, 2].astype(np.int32)
+                    r = (r + 255)/2
+                    g = (g + 255)/2
+                    b = (b + 255)/2
+                    qr_array[y, x] = (r, g, b, 255)
+                    '''qr_array[y, x] = (bg_array[y, x, 0],  # 使用背景的顏色
+                                    bg_array[y, x, 1], 
+                                    bg_array[y, x, 2], 
+                                    80)  # 設定透明度（0-255，150為半透明）'''
+                # 如果是黑色模塊（檢查 RGB 值是否為黑色）
+                if qr_array[y, x, 0] == 0:
+                    #bg_array[y, x] = bg_array[y, x] / 4
+                    #qr_array[y, x] = bg_array[y, x]
+                    r = bg_array[y, x, 0].astype(np.int32)
+                    g = bg_array[y, x, 1].astype(np.int32)
+                    b = bg_array[y, x, 2].astype(np.int32)
+                    r = r/3
+                    g = g/3
+                    b = b/3
+                    qr_array[y, x] = (r, g, b, 255)
+                    
         bg_qr = Image.fromarray(qr_array)
         #bg_qr.show()
         name = output_file[:output_file.find('.')]
