@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import qrcode
 from PIL import Image
 import os
+import numpy as np
 
 thumbnail_path = "channel_thumbnail.jpg"
 
