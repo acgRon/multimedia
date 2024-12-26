@@ -45,7 +45,7 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
 
             # 調整 logo 尺寸（根據 QR Code 的尺寸）
             qr_width, qr_height = img.size
-            logo_size = qr_width // 4  # logo 大小約為 QR Code 的 1/4
+            logo_size = qr_width // 2  # logo 大小約為 QR Code 的 1/2
             logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
 
             # 計算 logo 的位置並貼到 QR Code 上
