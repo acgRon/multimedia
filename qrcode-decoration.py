@@ -95,12 +95,17 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
         # 創建半透明 QR Code 的效果
         for y in range(qr_array.shape[0]):
             for x in range(qr_array.shape[1]):
-                # 如果是白色模塊（檢查 RGB 值是否為白色）
-                if qr_array[y, x, 0] == 255:  
-                    qr_array[y, x] = (bg_array[y, x, 0],  # 使用背景的顏色
-                                    bg_array[y, x, 1], 
-                                    bg_array[y, x, 2], 
-                                    80)  # 設定透明度（0-255，越高越透明）
+                r = bg_array[y, x, 0].astype(np.int32)
+                g = bg_array[y, x, 1].astype(np.int32)
+                b = bg_array[y, x, 2].astype(np.int32)
+                r = (r + 255)/2
+                g = (g + 255)/2
+                b = (b + 255)/2
+                qr_array[y, x] = (r, g, b, 255)
+                '''qr_array[y, x] = (bg_array[y, x, 0],  # 使用背景的顏色
+                                bg_array[y, x, 1], 
+                                bg_array[y, x, 2], 
+                                80)  # 設定透明度（0-255，150為半透明）'''
         bg_qr = Image.fromarray(qr_array)
         #bg_qr.show()
         name = output_file[:output_file.find('.')]
