@@ -100,9 +100,9 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
                     qr_array[y, x] = (bg_array[y, x, 0],  # 使用背景的顏色
                                     bg_array[y, x, 1], 
                                     bg_array[y, x, 2], 
-                                    80)  # 設定透明度（0-255，150為半透明）
+                                    80)  # 設定透明度（0-255，越高越透明）
         bg_qr = Image.fromarray(qr_array)
-        bg_qr.show()
+        #bg_qr.show()
         name = output_file[:output_file.find('.')]
         bg_qr.save(f"{name}.png")
         #styled_qr.save("background_qrcode.png")
