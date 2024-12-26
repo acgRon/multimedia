@@ -63,7 +63,32 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
     img.save(output_file)
     
     print(f"QR Code 已儲存到 {output_file}")
+    
+def add_center(data, img, output_file="qrcode.png", mask_path=None):
+    logo_path = get_channel_thumbnail(data)
+    
+    if logo_path:
+            logo = Image.open(logo_path)
 
+            # 調整 logo 尺寸（根據 QR Code 的尺寸）
+            qr_width, qr_height = img.size
+            logo_size = qr_width // 2  # logo 大小約為 QR Code 的 1/2
+            logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
+
+            # 計算 logo 的位置並貼到 QR Code 上
+            logo_pos = ((qr_width - logo_size) // 2, (qr_height - logo_size) // 2)
+            
+            if mask_path:
+                mask = Image.open(mask_path).convert("L")
+                mask = mask.resize((logo_size, logo_size))
+                img.paste(logo, logo_pos, mask)
+            else:
+                img.paste(logo, logo_pos)
+
+    # 儲存 QR Code 圖像
+    
+    img.save(output_file)
+    
 def generate_custom_background_qrcode(data, output_file="qrcode.png", color="black", bg_color="white"):
     # 建立 QR Code 物件
     qr = qrcode.QRCode(
@@ -129,16 +154,19 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
         bg_qr = Image.fromarray(qr_array)
         #bg_qr.show()
         name = output_file[:output_file.find('.')]
-        bg_qr.save(f"{name}.png")
+        bg_qr.save(f"{name}_bg.png")
         #styled_qr.save("background_qrcode.png")
+        return bg_qr
 
-url = 'https://www.youtube.com/@mvllabccu9828'
+url = 'https://www.youtube.com/@ChroNoiR'
 get_channel_thumbnail(url)
 
 folder_path = "output"
 channel_name = url[url.find('@')+1:]
 
 output = f'{folder_path}/{channel_name}_qrcode.png'
+output2 = f'{folder_path}/{channel_name}_qrcode_cb.png'
+mask_path = "mask/mask1.png"
 
 try:
     os.makedirs(folder_path, exist_ok=True)
@@ -147,8 +175,6 @@ except FileExistsError:
 
 
 
-generate_custom_qrcode(url, output)
-
-#background qrcode's output
-output = f'output/{channel_name}_background_qrcode.png'
-generate_custom_background_qrcode(url, output)
+generate_custom_qrcode(url, output, mask_path=mask_path)
+bg_qr = generate_custom_background_qrcode(url, output)
+add_center(url, bg_qr, output2, mask_path=mask_path)
