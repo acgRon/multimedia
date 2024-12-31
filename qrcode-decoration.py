@@ -5,6 +5,7 @@ import qrcode
 from PIL import Image
 import os
 import numpy as np
+import urllib.parse
 
 thumbnail_path = "channel_thumbnail.jpg"
 
@@ -21,7 +22,7 @@ def get_channel_thumbnail(url):
             file.write(ch_icon)
     return thumbnail_path
 
-def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_color="white", mask_path=None):
+def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_color="white", thumbnail_percentage=1/2, mask_path=None):
     
     # 建立 QR Code 物件
     qr = qrcode.QRCode(
@@ -45,7 +46,7 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
 
             # 調整 logo 尺寸（根據 QR Code 的尺寸）
             qr_width, qr_height = img.size
-            logo_size = qr_width // 2  # logo 大小約為 QR Code 的 1/2
+            logo_size = round(qr_width * thumbnail_percentage)  # logo 大小
             logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
 
             # 計算 logo 的位置並貼到 QR Code 上
@@ -64,7 +65,7 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
     
     print(f"QR Code 已儲存到 {output_file}")
     
-def add_center(data, img, output_file="qrcode.png", mask_path=None):
+def add_center(data, img, output_file="qrcode.png", thumbnail_percentage=1/2, mask_path=None):
     logo_path = get_channel_thumbnail(data)
     
     if logo_path:
@@ -72,7 +73,7 @@ def add_center(data, img, output_file="qrcode.png", mask_path=None):
 
             # 調整 logo 尺寸（根據 QR Code 的尺寸）
             qr_width, qr_height = img.size
-            logo_size = qr_width // 2  # logo 大小約為 QR Code 的 1/2
+            logo_size = round(qr_width * thumbnail_percentage)  # logo 大小
             logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
 
             # 計算 logo 的位置並貼到 QR Code 上
@@ -158,7 +159,7 @@ def generate_custom_background_qrcode(data, output_file="qrcode.png", color="bla
         #styled_qr.save("background_qrcode.png")
         return bg_qr
 
-url = 'https://www.youtube.com/@ChroNoiR'
+url = input("youtube channal address: ")
 get_channel_thumbnail(url)
 
 folder_path = "output"
@@ -168,8 +169,12 @@ if channel_name_index > 0:
 else:
     channel_name = url[url.rfind('/')+1:]
 
+
+channel_name = urllib.parse.unquote(channel_name)
+
 output = f'{folder_path}/{channel_name}_qrcode.png'
 output2 = f'{folder_path}/{channel_name}_qrcode_cb.png'
+
 mask_path = input("using mask: ")
 if mask_path:
     mask_path = f"mask/mask{mask_path}.png"
@@ -182,7 +187,9 @@ except FileExistsError:
     print(f"Folder '{folder_path}' already exists.")
 
 
+thumbnail_percentage = float(input("thumbnail_percentage(float): "))
 
-generate_custom_qrcode(url, output, mask_path=mask_path)
+
+generate_custom_qrcode(url, output, thumbnail_percentage=thumbnail_percentage, mask_path=mask_path)
 bg_qr = generate_custom_background_qrcode(url, output)
-add_center(url, bg_qr, output2, mask_path=mask_path)
+add_center(url, bg_qr, output2, thumbnail_percentage=thumbnail_percentage, mask_path=mask_path)
