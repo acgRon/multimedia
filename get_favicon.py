@@ -5,6 +5,7 @@ import qrcode
 from PIL import Image
 import urllib.parse
 import os
+import re
 
 favicon_path = "favicon.ico"
 
@@ -79,7 +80,9 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
 url = input("address: ")
 folder_path = "output_favicon"
 
-website_name = url.split(".", 2)[1]
+match = re.search(r'://(?:www\.)?([^./]+)', url)
+website_name = match.group(1)
+print(website_name)
 
     
 website_name = urllib.parse.unquote(website_name)
