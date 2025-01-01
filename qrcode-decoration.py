@@ -12,16 +12,21 @@ thumbnail_path = "channel_thumbnail.jpg"
 def get_channel_thumbnail(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
+    
+    with open('output.txt', 'w', encoding='utf-8') as file:
+        print(response.text, file=file)
 
     thumbnail_meta  = soup.find("meta", property="og:image")
     if not thumbnail_meta :
-        print("not thing there!")
+        print("thumbnail not there!")
+        return None
     else:
         ch_icon = requests.get(thumbnail_meta['content']).content
         with open(thumbnail_path, "wb") as file:
             file.write(ch_icon)
     return thumbnail_path
-
+        
+    
 def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_color="white", thumbnail_percentage=1/2, mask_path=None):
     
     # 建立 QR Code 物件
@@ -32,8 +37,6 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
         border=4,  # 邊框的厚度（單位：方塊）
     )
     
-    logo_path = get_channel_thumbnail(data)
-
     # 添加資料
     qr.add_data(data)
     qr.make(fit=True)
@@ -41,6 +44,11 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
     # 生成 QR Code 圖像
     #img = qr.make_image(image_factory=qrcode.image.styledpil.StyledPilImage, embeded_image_path=logo_path).convert("RGB")
     img = qr.make_image(fill_color=color, back_color=bg_color).convert("RGB")
+    
+    logo_path = get_channel_thumbnail(data)
+    
+        
+    
     if logo_path:
             logo = Image.open(logo_path)
 
@@ -57,12 +65,13 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
                 mask = mask.resize((logo_size, logo_size))
                 img.paste(logo, logo_pos, mask)
             else:
+                print("找不到對應的mask")
                 img.paste(logo, logo_pos)
-
+    else:
+        print("找不到可用的logo")
+        
     # 儲存 QR Code 圖像
-    
-    img.save(output_file)
-    
+    img.save(output_file) # 儲存 QR Code 圖像
     print(f"QR Code 已儲存到 {output_file}")
     
 def add_center(data, img, output_file="qrcode.png", thumbnail_percentage=1/2, mask_path=None):
@@ -84,8 +93,10 @@ def add_center(data, img, output_file="qrcode.png", thumbnail_percentage=1/2, ma
                 mask = mask.resize((logo_size, logo_size))
                 img.paste(logo, logo_pos, mask)
             else:
+                print("找不到對應的mask")
                 img.paste(logo, logo_pos)
-
+    else:
+        print("找不到可用的logo")
     # 儲存 QR Code 圖像
     
     img.save(output_file)
