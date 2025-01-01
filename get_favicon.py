@@ -24,13 +24,14 @@ def get_favicon(url):
     if icon_response.status_code == 200:
         with open("favicon.ico", "wb") as file:
             file.write(icon_response.content)
+            
         print(f"Favicon 已下載: {icon_url}")
         return favicon_path
     else:
         print("未能找到 Favicon 或下載失敗")
         return None
         
-def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_color="white", thumbnail_percentage=1/2, mask_path=None):
+def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_color="white", thumbnail_percentage=1/2):
     
     # 建立 QR Code 物件
     qr = qrcode.QRCode(
@@ -46,30 +47,27 @@ def generate_custom_qrcode(data, output_file="qrcode.png", color="black", bg_col
 
     # 生成 QR Code 圖像
     #img = qr.make_image(image_factory=qrcode.image.styledpil.StyledPilImage, embeded_image_path=logo_path).convert("RGB")
-    img = qr.make_image(fill_color=color, back_color=bg_color).convert("RGB")
+    img = qr.make_image(fill_color=color, back_color=bg_color).convert("RGBA")
     
     logo_path = get_favicon(data)
     
         
     
     if logo_path:
-            logo = Image.open(logo_path)
+            logo = Image.open(logo_path).convert("RGBA")
+            
 
             # 調整 logo 尺寸（根據 QR Code 的尺寸）
             qr_width, qr_height = img.size
             logo_size = round(qr_width * thumbnail_percentage)  # logo 大小
             logo = logo.resize((logo_size, logo_size), Image.LANCZOS)
 
+
             # 計算 logo 的位置並貼到 QR Code 上
             logo_pos = ((qr_width - logo_size) // 2, (qr_height - logo_size) // 2)
             
-            if mask_path:
-                mask = Image.open(mask_path).convert("L")
-                mask = mask.resize((logo_size, logo_size))
-                img.paste(logo, logo_pos, mask)
-            else:
-                print("找不到對應的mask")
-                img.paste(logo, logo_pos)
+            img.paste(logo, logo_pos, logo)
+
     else:
         print("找不到可用的logo")
         
@@ -82,19 +80,13 @@ folder_path = "output_favicon"
 
 match = re.search(r'://(?:www\.)?([^./]+)', url)
 website_name = match.group(1)
-print(website_name)
+
 
     
 website_name = urllib.parse.unquote(website_name)
 
 output = f'{folder_path}/{website_name}_qrcode.png'
-output2 = f'{folder_path}/{website_name}_qrcode_cb.png'
 
-mask_path = input("using mask: ")
-if mask_path:
-    mask_path = f"mask/mask{mask_path}.png"
-else:   
-    mask_path = None
 
 try:
     os.makedirs(folder_path, exist_ok=True)
@@ -105,4 +97,4 @@ except FileExistsError:
 thumbnail_percentage = float(input("thumbnail_percentage(float): "))
 
 
-generate_custom_qrcode(url, output, thumbnail_percentage=thumbnail_percentage, mask_path=mask_path)
+generate_custom_qrcode(url, output, thumbnail_percentage=thumbnail_percentage)
